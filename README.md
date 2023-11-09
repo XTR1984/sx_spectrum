@@ -1,5 +1,4 @@
 !["demopic 1](images/demopic1.PNG?raw=true )
-!["demopic 2](images/demogif1.gif?raw=true )
 
 - Реализация анализатора спектра на чипе Semtech SX127x (Lora/FSK-трансивер)
 - Cборка сконфигурирована для контроллера ESP32S2 в среде Platformio
