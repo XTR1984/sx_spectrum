@@ -22,12 +22,12 @@ class SXSpectrum(): #sx127x spectrum getter
           print("init ok")
         pass
 
-    def getSpectrum(self, startf, step, size, showtime=True):
+    def getSpectrumRaw(self, start_freq, step, size, showtime=True):
         st = time.time()
-        startf = int (startf*1000000)
+        start_freq = int (start_freq*1000000)
         step = int (step * 1000000)
         #spm = bytearray(size)
-        req = "Sweep:"+str(startf)+":"+ str(step)+":" + str(size)+"\n"
+        req = "Sweep:"+str(start_freq)+":"+ str(step)+":" + str(size)+"\n"
         self.ser.write(req.encode("ASCII"))
         self.ser.flush()
         spm = self.ser.read(size)
@@ -35,10 +35,15 @@ class SXSpectrum(): #sx127x spectrum getter
         if showtime:
             print("sweeptime=", delta)
         return spm
+    
+    def getSpectrum(self, start_freq, step, size, showtime=True):
+        spm = self.getSpectrumRaw(self, start_freq, step, size, showtime)
+        spm2 = [-x/2 for x in spm]
+        return spm2
 
-    def getSpectrumNumPy(self,startf,step,size):
+    def getSpectrumNumPy(self,start_freq,step,size):
         import numpy as np
-        data = self.getSpectrum(startf, step, size)
+        data = self.getSpectrumRaw(start_freq, step, size)
         y = np.frombuffer(data,dtype=np.uint8)
         y = np.float32(y)
         y = - y/2
@@ -46,37 +51,37 @@ class SXSpectrum(): #sx127x spectrum getter
 
 
 
-def drawSpectrum(sx,startf,step,sz):
-    y = sx.getSpectrumNumPy(startf,step,sz)
-    x = np.linspace(startf, startf+y.size*step, y.size)
+def drawSpectrum(sx,start_freq,step,steps):
+    y = sx.getSpectrumNumPy(start_freq,step,steps)
+    x = np.linspace(start_freq, start_freq+y.size*step, y.size)
     plt.plot(x, y)
     plt.show()
 
-def animate_plt(sx, startf,step,sz,waterfall=True):
+def animate_plt(sx, start_freq,step,steps,waterfall=True, ylim=(-130.0, -90.0),cmap="jet"):
     fig, axes = plt.subplots(2,1)
-    waterfall_data = np.zeros((100,sz))
+    waterfall_data = np.zeros((100,steps))
     waterfall_data[:]=-100
-    y = sx.getSpectrumNumPy(startf,step,sz)
-    x = np.linspace(startf, startf+y.size*step, y.size)
+    y = sx.getSpectrumNumPy(start_freq,step,steps)
+    x = np.linspace(start_freq, start_freq+y.size*step, y.size)
     pic1, = axes[0].plot(x, y,"r-", animated=True)
-    vmin,vmax = -120,-90
+    vmin,vmax = ylim
     norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
-    pic2 = axes[1].pcolormesh(waterfall_data,norm=norm)
+    pic2 = axes[1].pcolormesh(waterfall_data,norm=norm,cmap=cmap)
     pics = [pic1,pic2]
     axes[0].set_xlabel('frequency, MHz')
     axes[0].set_ylabel('RSSI,dBm')
     axes[0].set_title("sx spectrum")
-    axes[0].set_ylim([-130.0, -90.0])
+    axes[0].set_ylim(ylim)
     axes[0].margins(0)
     axes[1].set_xticks([])
 
     def subanimate(i):
         nonlocal waterfall_data
-        y = sx.getSpectrumNumPy(startf,step,sz)
+        y = sx.getSpectrumNumPy(start_freq,step,steps)
         pic1.set_data(x, y)
         waterfall_data = np.roll(waterfall_data,-1,axis=0)
-        waterfall_data[99,:sz] = y
-        pics[1]= axes[1].pcolormesh(waterfall_data,norm=norm)
+        waterfall_data[99,:] = y
+        pics[1]= axes[1].pcolormesh(waterfall_data,norm=norm,cmap=cmap)
         return pics
 
     anim = animation.FuncAnimation(fig, subanimate, 
@@ -91,10 +96,10 @@ def main():
    ser = serial.Serial("COM10", 115200,timeout=5)
    sx = SXSpectrum(ser)
    sx.init()
-   startf = 750
-   step = 0.5
-   sz = 500
-   animate_plt(sx,startf,step,sz)
+   #start_freq, step, steps  = 432, 0.01, 300
+   #start_freq, step, steps  = 300, 0.5, 300
+   start_freq, step, steps  = 750, 0.5, 500
+   animate_plt(sx,start_freq,step,steps,cmap="hot")
 
 if __name__ == '__main__':
     main()
