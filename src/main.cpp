@@ -7,7 +7,6 @@
 #include "functions.h"
 
 //#define FREQUENCY 868000000
-#define LED 15
 
 uint64_t freq;
 uint8_t gain = 1; 
@@ -60,12 +59,13 @@ void loop(){
       init();
     }
     if (str.startsWith("Sweep")){
-      digitalWrite(LED, digitalRead(LED)^1);
+      digitalWrite(LED, HIGH);
       int f = getValue(str,':',1).toInt();
       int step = getValue(str,':',2).toInt();
       int size = getValue(str,':',3).toInt();
       doSweep(f, step, size);
       Serial.flush();
+      digitalWrite(LED, LOW);
     }
   }
   delay(5);

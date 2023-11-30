@@ -57,7 +57,7 @@ def drawSpectrum(sx,start_freq,step,steps):
     plt.plot(x, y)
     plt.show()
 
-def animate_plt(sx, start_freq,step,steps,waterfall=True, ylim=(-130.0, -90.0),cmap="jet"):
+def animate_plt(sx, start_freq,step,steps,ylim=(-130.0, -90.0),cmap="jet"):
     fig, axes = plt.subplots(2,1)
     waterfall_data = np.zeros((100,steps))
     waterfall_data[:]=-100
@@ -93,13 +93,14 @@ def animate_plt(sx, start_freq,step,steps,waterfall=True, ylim=(-130.0, -90.0),c
 
 
 def main():
-   ser = serial.Serial("COM10", 115200,timeout=5)
+   ser = serial.Serial("COM5", 115200,timeout=5)
    sx = SXSpectrum(ser)
    sx.init()
-   #start_freq, step, steps  = 432, 0.01, 300
+   start_freq, step, steps  = 432, 0.01, 500
    #start_freq, step, steps  = 300, 0.5, 300
-   start_freq, step, steps  = 750, 0.5, 500
+   #start_freq, step, steps  = 750, 0.5, 500
    animate_plt(sx,start_freq,step,steps,cmap="hot")
+   #drawSpectrum(sx,start_freq,step,steps)
 
 if __name__ == '__main__':
     main()

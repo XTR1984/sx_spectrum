@@ -12,18 +12,18 @@
 // Module functions
 static void SX127x_write_reg(uint8_t address, uint8_t reg_value)
 {
-  digitalWrite(SX127x_NSS, LOW);  // Select SX127x SPI device
+  digitalWrite(SX127x_SS, LOW);  // Select SX127x SPI device
   SPI.transfer(address | 0x80);             
   SPI.transfer(reg_value);
-  digitalWrite(SX127x_NSS, HIGH);  // Clear SX127x SPI device selection
+  digitalWrite(SX127x_SS, HIGH);  // Clear SX127x SPI device selection
 }
 
 static uint8_t SX127x_read_reg(uint8_t address)
 {
-  digitalWrite(SX127x_NSS, LOW);  // Select SX127x SPI device
+  digitalWrite(SX127x_SS, LOW);  // Select SX127x SPI device
   SPI.transfer(address & 0x7F);
   uint8_t reg_value = SPI.transfer(0);
-  digitalWrite(SX127x_NSS, HIGH);  // Clear SX127x SPI device selection
+  digitalWrite(SX127x_SS, HIGH);  // Clear SX127x SPI device selection
 
   return reg_value;
 }
@@ -31,23 +31,23 @@ static uint8_t SX127x_read_reg(uint8_t address)
 // Exported functions
 void SX127x_begin(void)
 {
-  SPI.begin(SX127x_SCK, SX127x_MISO, SX127x_MOSI, SX127x_NSS); // Begin SPI communication
+  SPI.begin(SX127x_SCK, SX127x_MISO, SX127x_MOSI, SX127x_SS); // Begin SPI communication
 
-  pinMode(SX127x_NSS, OUTPUT);
-  digitalWrite(SX127x_NSS, HIGH);  // Clear SX127x SPI device selection
+  pinMode(SX127x_SS, OUTPUT);
+  digitalWrite(SX127x_SS, HIGH);  // Clear SX127x SPI device selection
 
-  pinMode(SX127x_NRESET, OUTPUT);
+  pinMode(SX127x_RESET, OUTPUT);
   SX127x_enable();
 }
 
 void SX127x_enable(void)
 {
-  digitalWrite(SX127x_NRESET, HIGH); // Enable SX127x
+  digitalWrite(SX127x_RESET, HIGH); // Enable SX127x
 }
 
 void SX127x_disable(void)
 {
-  digitalWrite(SX127x_NRESET, LOW); // Disable SX127x
+  digitalWrite(SX127x_RESET, LOW); // Disable SX127x
 }
 
 void SX127x_sleep(void)
@@ -63,9 +63,9 @@ void SX127x_sleep(void)
 
 void SX127x_reset(void)
 {
-  digitalWrite(SX127x_NRESET, LOW); // Disable SX127x
+  digitalWrite(SX127x_RESET, LOW); // Disable SX127x
   delay(5);
-  digitalWrite(SX127x_NRESET, HIGH); // Enable SX127x
+  digitalWrite(SX127x_RESET, HIGH); // Enable SX127x
   delay(5);
 }
 
