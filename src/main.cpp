@@ -49,15 +49,6 @@ void loop(){
   esp_task_wdt_reset();
   if (Serial.available() > 0) {
     String str = Serial.readString();
-    if (str.startsWith("Init")){
-      digitalWrite(LED, digitalRead(LED)^1);
-      gain = getValue(str,':',1).toInt();
-      avgsamples = getValue(str,':',2).toInt();
-      rxbwmant = getValue(str,':',3).toInt();
-      rxbwexp = getValue(str,':',4).toInt();
-      delay_us = getValue(str,':',5).toInt();
-      init();
-    }
     if (str.startsWith("Sweep")){
       digitalWrite(LED, HIGH);
       int f = getValue(str,':',1).toInt();
@@ -67,6 +58,33 @@ void loop(){
       Serial.flush();
       digitalWrite(LED, LOW);
     }
+    else if (str.startsWith("GetRSSI")){
+      digitalWrite(LED, HIGH);
+      delayMicroseconds(delay_us);
+      Serial.write(SX127x_getRSSI_raw());
+      Serial.flush();
+      digitalWrite(LED, LOW);
+    }
+    else if (str.startsWith("Init")){
+      digitalWrite(LED, HIGH);
+      gain = getValue(str,':',1).toInt();
+      avgsamples = getValue(str,':',2).toInt();
+      rxbwmant = getValue(str,':',3).toInt();
+      rxbwexp = getValue(str,':',4).toInt();
+      delay_us = getValue(str,':',5).toInt();
+      init();
+      digitalWrite(LED, LOW);
+    }
+    else if (str.startsWith("SetFreq")){
+      digitalWrite(LED, HIGH);
+      int f = getValue(str,':',1).toInt();
+      uint64_t freq = f;
+      SX127x_set_frequency(&freq);
+      Serial.write("OK");
+      Serial.flush();
+      digitalWrite(LED, LOW);
+    }
+
   }
   delay(5);
 }
